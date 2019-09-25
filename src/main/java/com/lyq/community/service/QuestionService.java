@@ -38,9 +38,9 @@ public class QuestionService {
             String[] tags = StringUtils.split(search, " ");
             search = Arrays.stream(tags).collect(Collectors.joining("|"));
         }
-        QuestionQueryDTO questionQueryDTO1 = new QuestionQueryDTO();
-        questionQueryDTO1.setSearch(search);
-        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO1);
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
         Integer totalPage;
         if (totalCount % size == 0) {
             totalPage = totalCount / size;
@@ -57,7 +57,7 @@ public class QuestionService {
         paginationDTO.setPagination(totalPage, page);
         Integer offset = size * (page - 1);
 
-        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+
         questionQueryDTO.setPage(offset);
         questionQueryDTO.setSize(size);
         List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);

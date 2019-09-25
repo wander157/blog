@@ -45,15 +45,6 @@
             <if test="search != null and search != ''">
                 and title regexp #{search}
             </if>
-            <if test="tag != null and tag != ''">
-                and tag regexp #{tag}
-            </if>
-            <if test="sort != null and sort != '' and sort == 'no'">
-                and comment_count = 0
-            </if>
-            <if test="time != null and time != ''">
-                and gmt_create > #{time}
-            </if>
         </where>
     </select>
 
@@ -64,28 +55,8 @@
             <if test="search != null and search != ''">
                 and title regexp #{search}
             </if>
-            <if test="tag != null and tag != ''">
-                and tag regexp #{tag}
-            </if>
-            <if test="sort != null and sort != '' and sort == 'no'">
-                and comment_count = 0
-            </if>
-            <if test="time != null and time != ''">
-                and gmt_create > #{time}
-            </if>
         </where>
-        <if test="sort == null or sort == ''">
-            order by gmt_create desc
-        </if>
-        <if test="sort != null and sort != '' and sort == 'new'">
-            order by gmt_create desc
-        </if>
-        <if test="sort != null and sort != '' and sort == 'no'">
-            order by gmt_create desc
-        </if>
-        <if test="sort != null and sort != '' and (sort == 'hot' || sort == 'hot7' || sort == 'hot30')">
-            order by comment_count desc
-        </if>
+        order by gmt_create desc
         limit #{page},#{size}
     </select>
 
