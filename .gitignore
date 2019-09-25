@@ -1,9 +1,8 @@
 HELP.md
-target/
+community.vpp.*
+/target/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**
-!**/src/test/**
-
+logs/
 ### STS ###
 .apt_generated
 .classpath
@@ -25,7 +24,7 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+/build/
 
 ### VS Code ###
 .vscode/
