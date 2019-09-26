@@ -63,10 +63,10 @@ public class AuthorizeController {
                 response.addCookie(new Cookie("token", token));
             }
             //login success
-            log.error("登陆有毛病,在Authrize");
             //  request.getSession().setAttribute("user",githubUser);
             return "redirect:/";
         } else {
+            log.error("登陆有毛病,在Authrize");
             return "redirect:/";
         }
     }
