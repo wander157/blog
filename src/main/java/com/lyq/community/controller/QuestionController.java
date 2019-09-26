@@ -25,7 +25,9 @@ public class QuestionController {
     public String question(@PathVariable(name = "id") Long id,
                            Model model) {
         QuestionDTO questionDTO = questionService.getById(id);
+        //根据tag查出相关问题
         List<QuestionDTO> questionDTOS=questionService.selectRelated(questionDTO);
+        //根据问题ID查出相关的评论!
         List<CommentDTO> comments = commentService.listByTargetId(id, CommentTypeEnum.QUESTION);
         //累加阅读数
         questionService.incView(id);

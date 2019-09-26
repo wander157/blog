@@ -2,10 +2,8 @@ package com.lyq.community.service;
 
 import com.lyq.community.dto.PaginationDTO;
 import com.lyq.community.dto.QuestionDTO;
-import com.lyq.community.dto.QuestionQueryDTO;
 import com.lyq.community.exception.CustomizeErrorCode;
 import com.lyq.community.exception.CustomizeException;
-import com.lyq.community.mapper.QuestionExtMapper;
 import com.lyq.community.mapper.QuestionMapper;
 import com.lyq.community.mapper.UserMapper;
 import com.lyq.community.model.Question;
@@ -18,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,18 +26,13 @@ public class QuestionService {
     private QuestionMapper questionMapper;
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private QuestionExtMapper questionExtMapper;
 
 
-    public PaginationDTO list(String search, Integer page, Integer size) {
-        if (StringUtils.isNotBlank(search)) {
-            String[] tags = StringUtils.split(search, " ");
-            search = Arrays.stream(tags).collect(Collectors.joining("|"));
-        }
-        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
-        questionQueryDTO.setSearch(search);
-        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
+    public PaginationDTO list(Integer page, Integer size) {
+
+
+        //查出来是Long 转换一下
+        Integer totalCount = Math.toIntExact(questionMapper.countByExample(new QuestionExample()));
         Integer totalPage;
         if (totalCount % size == 0) {
             totalPage = totalCount / size;
@@ -57,10 +49,7 @@ public class QuestionService {
         paginationDTO.setPagination(totalPage, page);
         Integer offset = size * (page - 1);
 
-
-        questionQueryDTO.setPage(offset);
-        questionQueryDTO.setSize(size);
-        List<Question> questions = questionExtMapper.selectBySearch(questionQueryDTO);
+        List<Question> questions = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
         List<QuestionDTO> questionDTOS = new ArrayList<>();
         for (Question question : questions) {
             User user = userMapper.selectByPrimaryKey(question.getCreator());
@@ -154,10 +143,9 @@ public class QuestionService {
     }
 
     public void incView(Long id) {
-        Question question = new Question();
-        question.setId(id);
-        question.setViewCount(1);
-        questionExtMapper.incView(question);
+        Question question = questionMapper.selectByPrimaryKey(id);
+        question.setViewCount(question.getViewCount() + 1);
+        questionMapper.updateByPrimaryKey(question);
     }
 
     public List<QuestionDTO> selectRelated(QuestionDTO questionDTO) {
@@ -165,16 +153,22 @@ public class QuestionService {
             return new ArrayList<>();
         }
         String[] tags = StringUtils.split(questionDTO.getTag(), ",");
-        String regexTag = Arrays.stream(tags).collect(Collectors.joining("|"));
-        Question question = new Question();
-        question.setId(questionDTO.getId());
-        question.setTag(regexTag);
-        List<Question> questions = questionExtMapper.selectRelated(question);
+        List<String> regexTag = new ArrayList<>();
+        for (String tag : tags) {
+            regexTag.add(tag);
+        }
+        //selectByTag 可能这里会出问题
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.createCriteria().andTagIn(regexTag);
+        List<Question> questions = questionMapper.selectByExample(questionExample);
+        Long questionDTOId = questionDTO.getId();
         List<QuestionDTO> questionDTOS = questions.stream().map(question1 -> {
+            //排除掉本问题
 
-            QuestionDTO dto = new QuestionDTO();
-            BeanUtils.copyProperties(question1, dto);
-            return dto;
+                QuestionDTO dto = new QuestionDTO();
+                BeanUtils.copyProperties(question1, dto);
+                return dto;
+
         }).collect(Collectors.toList());
         return questionDTOS;
     }
