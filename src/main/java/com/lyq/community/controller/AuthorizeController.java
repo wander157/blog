@@ -47,7 +47,9 @@ public class AuthorizeController {
         accessTokenDTO.setClient_secret(secret);
         accessTokenDTO.setState(state);
         accessTokenDTO.setRedirect_uri(uri);
+        //得到git传回来的数据
         String accessToken = githubProvider.getAccessToken(accessTokenDTO);
+        //通过解析封装成一个对象!
         GithubUser githubUser = githubProvider.getUser(accessToken);
         if (githubUser != null) {
             if (githubUser != null) {
